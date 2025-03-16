@@ -778,7 +778,7 @@ typedef struct afl_state {
 
   /* plot file saves from last run */
   u32 plot_prev_qp, plot_prev_pf, plot_prev_pnf, plot_prev_ce, plot_prev_md;
-  u64 plot_prev_qc, plot_prev_uc, plot_prev_uh, plot_prev_ed;
+  u64 plot_prev_qc, plot_prev_uc, plot_prev_uh, plot_prev_ed, plot_prev_ge;
 
   u64 stats_last_stats_ms, stats_last_plot_ms, stats_last_queue_ms,
       stats_last_ms, stats_last_execs;
@@ -865,6 +865,13 @@ typedef struct afl_state {
   char  m_tmp[4096];
   FILE *introspection_file;
   u32   bitsmap_size;
+  u32   seed_len;
+#define N_MUT_SIZE (1 << 21)
+  u32 *n_mut;
+  u32 n_mut_idx;
+  u64 gen_tc_total;
+  u32 calib_total;
+  u32 rerun_hang_total;
 #endif
 
 } afl_state_t;

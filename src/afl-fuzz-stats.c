@@ -371,6 +371,10 @@ void write_stats_file(afl_state_t *afl, u32 t_bytes, double bitmap_cvg,
           "trim_time         : %llu\n"
           "execs_done        : %llu\n"
           "execs_per_sec     : %0.02f\n"
+          "tc_gen            : %llu\n"
+          "trims_done        : %llu\n"
+          "calibrate_seed    : %u\n"
+          "rerun_hang        : %u\n"
           "execs_ps_last_min : %0.02f\n"
           "corpus_count      : %u\n"
           "corpus_favored    : %u\n"
@@ -420,6 +424,7 @@ void write_stats_file(afl_state_t *afl, u32 t_bytes, double bitmap_cvg,
           afl->sync_time_us / 1000000, afl->trim_time_us / 1000000,
           afl->fsrv.total_execs,
           afl->fsrv.total_execs / ((double)(runtime_ms) / 1000),
+          afl->gen_tc_total, afl->trim_execs, afl->calib_total, afl->rerun_hang_total,
           afl->last_avg_execs_saved, afl->queued_items, afl->queued_favored,
           afl->queued_discovered, afl->queued_imported, afl->queued_variable,
           afl->max_depth, afl->current_entry, afl->pending_favored,
@@ -571,6 +576,7 @@ void maybe_update_plot_file(afl_state_t *afl, u32 t_bytes, double bitmap_cvg,
   afl->plot_prev_uh = afl->saved_hangs;
   afl->plot_prev_md = afl->max_depth;
   afl->plot_prev_ed = afl->fsrv.total_execs;
+  afl->plot_prev_ge = afl->gen_tc_total;
 
   /* Fields in the file:
 
@@ -579,13 +585,13 @@ void maybe_update_plot_file(afl_state_t *afl, u32 t_bytes, double bitmap_cvg,
      execs_per_sec, edges_found */
 
   fprintf(afl->fsrv.plot_file,
-          "%llu, %llu, %u, %u, %u, %u, %0.02f%%, %llu, %llu, %u, %0.02f, %llu, "
+          "%llu, %llu, %u, %u, %u, %u, %0.02f%%, %llu, %llu, %u, %0.02f, %llu, %llu, "
           "%u, %llu, %u",
           ((afl->prev_run_time + get_cur_time() - afl->start_time) / 1000),
           afl->queue_cycle - 1, afl->current_entry, afl->queued_items,
           afl->pending_not_fuzzed, afl->pending_favored, bitmap_cvg,
           afl->saved_crashes, afl->saved_hangs, afl->max_depth, eps,
-          afl->plot_prev_ed, t_bytes, afl->total_crashes,
+          afl->plot_prev_ed, afl->plot_prev_ge, t_bytes, afl->total_crashes,
           (u32)afl->san_binary_length);                    /* ignore errors */
 
   for (u32 i = 0; i < afl->san_binary_length; i++) {

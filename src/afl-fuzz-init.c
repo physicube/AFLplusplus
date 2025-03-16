@@ -2331,7 +2331,7 @@ void setup_dirs_fds(afl_state_t *afl) {
     fprintf(afl->fsrv.plot_file,
             "# relative_time, cycles_done, cur_item, corpus_count, "
             "pending_total, pending_favs, map_size, saved_crashes, "
-            "saved_hangs, max_depth, execs_per_sec, total_execs, edges_found, "
+            "saved_hangs, max_depth, execs_per_sec, total_execs, total_gen, edges_found, "
             "total_crashes, servers_count");
 
     if (afl->san_binary_length) {

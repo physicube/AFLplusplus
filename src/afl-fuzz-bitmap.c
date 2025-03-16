@@ -643,8 +643,14 @@ u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
 #ifdef INTROSPECTION
         if (afl->mutation[0] != 0) {
           // ===== Log LENGTHS of ALL testcases ==== //
-          fprintf(afl->introspection_file, "L %u\n", len);
-
+          if (afl->n_mut_idx >= N_MUT_SIZE) {
+            fwrite(afl->n_mut, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
+            afl->n_mut_idx = 0;
+          }
+          // fprintf(afl->introspection_file, "L %u\n", len);
+          afl->n_mut[afl->n_mut_idx] = len;
+          ++afl->n_mut_idx;
+          ++afl->gen_tc_total;
         }
 #endif
 
@@ -742,7 +748,7 @@ u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
 
       // fprintf(afl->introspection_file, "QUEUE %s = %s\n", afl->mutation,
       //         afl->queue_top->fname);
-      fprintf(afl->introspection_file, "L_Q %u\n", len);
+      // fprintf(afl->introspection_file, "L_Q %u\n", len);
     }
 
 #endif
@@ -845,7 +851,7 @@ may_save_fault:
       } else if (afl->mutation[0] != 0) {
 
         // fprintf(afl->introspection_file, "UNIQUE_TIMEOUT %s\n", afl->mutation);
-        fprintf(afl->introspection_file, "UT %u\n", len);
+        // fprintf(afl->introspection_file, "UT %u\n", len);
 
       }
 
@@ -871,6 +877,9 @@ may_save_fault:
         }
 
         new_fault = fuzz_run_target(afl, &afl->fsrv, afl->hang_tmout);
+#ifdef INTROSPECTION
+         ++afl->rerun_hang_total;
+ #endif
         classify_counts(&afl->fsrv);
 
         /* A corner case that one user reported bumping into: increasing the
@@ -1021,7 +1030,7 @@ may_save_fault:
       } else if (afl->mutation[0] != 0) {
 
         // fprintf(afl->introspection_file, "UNIQUE_CRASH %s\n", afl->mutation);
-        fprintf(afl->introspection_file, "UC %u\n", len);
+        // fprintf(afl->introspection_file, "UC %u\n", len);
 
       }
 
