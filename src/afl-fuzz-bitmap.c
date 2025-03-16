@@ -640,6 +640,14 @@ u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
       if (san_fault == FSRV_RUN_OK) {
 
         if (unlikely(afl->crash_mode)) { ++afl->total_crashes; }
+#ifdef INTROSPECTION
+        if (afl->mutation[0] != 0) {
+          // ===== Log LENGTHS of ALL testcases ==== //
+          fprintf(afl->introspection_file, "L %u\n", len);
+
+        }
+#endif
+
         return 0;
 
       } else {
@@ -732,9 +740,9 @@ u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
 
     } else if (afl->mutation[0] != 0) {
 
-      fprintf(afl->introspection_file, "QUEUE %s = %s\n", afl->mutation,
-              afl->queue_top->fname);
-
+      // fprintf(afl->introspection_file, "QUEUE %s = %s\n", afl->mutation,
+      //         afl->queue_top->fname);
+      fprintf(afl->introspection_file, "L_Q %u\n", len);
     }
 
 #endif
@@ -836,7 +844,8 @@ may_save_fault:
 
       } else if (afl->mutation[0] != 0) {
 
-        fprintf(afl->introspection_file, "UNIQUE_TIMEOUT %s\n", afl->mutation);
+        // fprintf(afl->introspection_file, "UNIQUE_TIMEOUT %s\n", afl->mutation);
+        fprintf(afl->introspection_file, "UT %u\n", len);
 
       }
 
@@ -1011,7 +1020,8 @@ may_save_fault:
 
       } else if (afl->mutation[0] != 0) {
 
-        fprintf(afl->introspection_file, "UNIQUE_CRASH %s\n", afl->mutation);
+        // fprintf(afl->introspection_file, "UNIQUE_CRASH %s\n", afl->mutation);
+        fprintf(afl->introspection_file, "UC %u\n", len);
 
       }
 
