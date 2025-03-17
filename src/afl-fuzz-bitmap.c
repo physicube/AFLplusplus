@@ -645,10 +645,12 @@ u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
           // ===== Log LENGTHS of ALL testcases ==== //
           if (afl->n_mut_idx >= N_MUT_SIZE) {
             fwrite(afl->n_mut, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
+            fwrite(afl->n_len, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
             afl->n_mut_idx = 0;
           }
           // fprintf(afl->introspection_file, "L %u\n", len);
-          afl->n_mut[afl->n_mut_idx] = len;
+          afl->n_mut[afl->n_mut_idx] = afl->mutated_bytes;
+          afl->n_len[afl->n_mut_idx] = len;
           ++afl->n_mut_idx;
           ++afl->gen_tc_total;
         }

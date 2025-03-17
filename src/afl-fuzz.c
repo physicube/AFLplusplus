@@ -3018,6 +3018,7 @@ int main(int argc, char **argv_orig, char **envp) {
 
   #ifdef INTROSPECTION
   afl->n_mut = ck_alloc(N_MUT_SIZE * sizeof(u32));
+  afl->n_len = ck_alloc(N_MUT_SIZE * sizeof(u32));
   char ifn[4096];
   snprintf(ifn, sizeof(ifn), "%s/introspection.txt", afl->out_dir);
   if ((afl->introspection_file = fopen(ifn, "w")) == NULL) {
@@ -3423,8 +3424,9 @@ stop_fuzzing:
   show_stats(afl);           // print the screen one last time
   write_bitmap(afl);
   save_auto(afl);
-  #ifdef INTROSPECTION
+#ifdef INTROSPECTION
   fwrite(afl->n_mut, sizeof(u32), afl->n_mut_idx, afl->introspection_file);
+  fwrite(afl->n_len, sizeof(u32), afl->n_mut_idx, afl->introspection_file);
 #endif
   #ifdef __AFL_CODE_COVERAGE
   if (afl->fsrv.persistent_trace_bits) {

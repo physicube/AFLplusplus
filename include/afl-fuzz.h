@@ -865,9 +865,11 @@ typedef struct afl_state {
   char  m_tmp[4096];
   FILE *introspection_file;
   u32   bitsmap_size;
-  u32   seed_len;
+  u32   mutated_bytes;
+  u32   spliced_bytes;
 #define N_MUT_SIZE (1 << 21)
   u32 *n_mut;
+  u32 *n_len;
   u32 n_mut_idx;
   u64 gen_tc_total;
   u32 calib_total;
