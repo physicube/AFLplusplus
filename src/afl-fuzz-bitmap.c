@@ -480,7 +480,19 @@ static inline u8 bitmap_read(u8 *map, u32 index) {
 
 u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
                                             u32 len, u8 fault) {
-
+#ifdef INTROSPECTION
+  // ===== Log LENGTHS of ALL testcases ==== //
+  if (afl->n_mut_idx >= N_MUT_SIZE) {
+    fwrite(afl->n_mut, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
+    fwrite(afl->n_len, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
+    afl->n_mut_idx = 0;
+  }
+  // fprintf(afl->introspection_file, "L %u\n", len);
+  afl->n_mut[afl->n_mut_idx] = afl->mutated_bytes;
+  afl->n_len[afl->n_mut_idx] = len;
+  ++afl->n_mut_idx;
+  ++afl->gen_tc_total;
+#endif
   if (unlikely(len == 0)) { return 0; }
 
   if (unlikely(fault == FSRV_RUN_TMOUT && afl->afl_env.afl_ignore_timeouts)) {
@@ -640,21 +652,6 @@ u8 __attribute__((hot)) save_if_interesting(afl_state_t *afl, void *mem,
       if (san_fault == FSRV_RUN_OK) {
 
         if (unlikely(afl->crash_mode)) { ++afl->total_crashes; }
-#ifdef INTROSPECTION
-        if (afl->mutation[0] != 0) {
-          // ===== Log LENGTHS of ALL testcases ==== //
-          if (afl->n_mut_idx >= N_MUT_SIZE) {
-            fwrite(afl->n_mut, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
-            fwrite(afl->n_len, sizeof(u32), N_MUT_SIZE, afl->introspection_file);
-            afl->n_mut_idx = 0;
-          }
-          // fprintf(afl->introspection_file, "L %u\n", len);
-          afl->n_mut[afl->n_mut_idx] = afl->mutated_bytes;
-          afl->n_len[afl->n_mut_idx] = len;
-          ++afl->n_mut_idx;
-          ++afl->gen_tc_total;
-        }
-#endif
 
         return 0;
 
